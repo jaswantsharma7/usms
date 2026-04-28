@@ -1,0 +1,68 @@
+const asyncHandler = require('../utils/asyncHandler');
+const ApiResponse = require('../utils/ApiResponse');
+const authService = require('../services/auth.service');
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+};
+
+const register = asyncHandler(async (req, res) => {
+  const { name, email, password, role } = req.body;
+  const { user, accessToken, refreshToken } = await authService.register({ name, email, password, role });
+
+  res
+    .status(201)
+    .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
+    .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
+    .json(new ApiResponse(201, { user, accessToken, refreshToken }, 'Registered successfully'));
+});
+
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const { user, accessToken, refreshToken } = await authService.login({ email, password });
+
+  res
+    .status(200)
+    .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
+    .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
+    .json(new ApiResponse(200, { user, accessToken, refreshToken }, 'Login successful'));
+});
+
+const logout = asyncHandler(async (req, res) => {
+  await authService.logout(req.user._id);
+  res
+    .status(200)
+    .clearCookie('accessToken')
+    .clearCookie('refreshToken')
+    .json(new ApiResponse(200, null, 'Logged out successfully'));
+});
+
+const refreshToken = asyncHandler(async (req, res) => {
+  const token = req.cookies?.refreshToken || req.body.refreshToken;
+  const { accessToken, refreshToken: newRefresh } = await authService.refreshAccessToken(token);
+
+  res
+    .status(200)
+    .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
+    .cookie('refreshToken', newRefresh, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
+    .json(new ApiResponse(200, { accessToken, refreshToken: newRefresh }, 'Token refreshed'));
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const resetUrlBase = `${process.env.CLIENT_URL}/reset-password`;
+  await authService.forgotPassword(req.body.email, resetUrlBase);
+  res.status(200).json(new ApiResponse(200, null, 'Password reset email sent'));
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const user = await authService.resetPassword(req.params.token, req.body.password);
+  res.status(200).json(new ApiResponse(200, user, 'Password reset successful'));
+});
+
+const getMe = asyncHandler(async (req, res) => {
+  res.status(200).json(new ApiResponse(200, req.user, 'User fetched'));
+});
+
+module.exports = { register, login, logout, refreshToken, forgotPassword, resetPassword, getMe };
