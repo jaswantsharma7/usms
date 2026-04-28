@@ -1,6 +1,11 @@
 import axios from 'axios';
-import { store } from '../app/store';
 import { logout, setTokens } from '../features/auth/authSlice';
+
+// 1. Define a store variable and an injection function
+let store;
+export const injectStore = (_store) => {
+  store = _store;
+};
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -13,8 +18,11 @@ const api = axios.create({
 // Request interceptor - attach access token
 api.interceptors.request.use(
   (config) => {
-    const token = store.getState().auth.accessToken;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    // 2. Safely use the injected store
+    if (store) {
+      const token = store.getState().auth.accessToken;
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -49,6 +57,8 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        if (!store) throw new Error("Store not injected");
+        
         const refreshToken = store.getState().auth.refreshToken;
         const res = await axios.post(
           `${API_URL}/auth/refresh-token`,
@@ -62,7 +72,9 @@ api.interceptors.response.use(
         return api(original);
       } catch (err) {
         processQueue(err, null);
-        store.dispatch(logout());
+        if (store) {
+          store.dispatch(logout());
+        }
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

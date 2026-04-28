@@ -5,8 +5,15 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
 import { store } from './app/store';
+
+// 1. Import the injection function from your API service
+import { injectStore } from './services/api';
+
 import ErrorBoundary from './components/common/ErrorBoundary';
 import './styles/index.css';
+
+// 2. Inject the store immediately before anything else renders
+injectStore(store);
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">

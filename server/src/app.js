@@ -70,6 +70,14 @@ if (process.env.NODE_ENV !== 'test') {
 // Static files (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Base route
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Welcome to the USMS API. Please use /api/v1 for API requests.' 
+  });
+});
+
 // Health check
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ success: true, message: 'USMS API is running', timestamp: new Date() });
