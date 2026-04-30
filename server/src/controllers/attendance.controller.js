@@ -1,5 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/ApiResponse');
+const ApiError = require('../utils/ApiError');
 const attendanceService = require('../services/attendance.service');
 const Student = require('../models/Student');
 const Faculty = require('../models/Faculty');
@@ -17,6 +18,7 @@ const getAttendanceByCourse = asyncHandler(async (req, res) => {
 
 const getMyAttendance = asyncHandler(async (req, res) => {
   const student = await Student.findOne({ userId: req.user._id });
+  if (!student) throw new ApiError(404, 'Student profile not found');
   const records = await attendanceService.getStudentAttendance(student._id, req.query.courseId);
   res.status(200).json(new ApiResponse(200, records, 'Attendance fetched'));
 });
@@ -34,6 +36,7 @@ const getAttendancePercentage = asyncHandler(async (req, res) => {
 
 const getMyAttendanceSummary = asyncHandler(async (req, res) => {
   const student = await Student.findOne({ userId: req.user._id });
+  if (!student) throw new ApiError(404, 'Student profile not found');
   const summary = await attendanceService.getStudentAttendanceSummary(student._id);
   res.status(200).json(new ApiResponse(200, summary, 'Attendance summary fetched'));
 });

@@ -1,5 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/ApiResponse');
+const ApiError = require('../utils/ApiError');
 const timetableService = require('../services/timetable.service');
 const Student = require('../models/Student');
 const Faculty = require('../models/Faculty');
@@ -18,9 +19,11 @@ const getMyTimetable = asyncHandler(async (req, res) => {
   let entries;
   if (req.user.role === 'student') {
     const student = await Student.findOne({ userId: req.user._id });
+    if (!student) throw new ApiError(404, 'Student profile not found');
     entries = await timetableService.getStudentTimetable(student._id);
   } else if (req.user.role === 'faculty') {
     const faculty = await Faculty.findOne({ userId: req.user._id });
+    if (!faculty) throw new ApiError(404, 'Faculty profile not found');
     entries = await timetableService.getTimetable({ facultyId: faculty._id });
   } else {
     entries = await timetableService.getTimetable(req.query);
