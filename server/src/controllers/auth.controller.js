@@ -10,19 +10,23 @@ const cookieOptions = {
 
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
-  const { user, accessToken, refreshToken } = await authService.register({ name, email, password, role });
+  const { user } = await authService.register({ name, email, password, role });
+  res.status(201).json(new ApiResponse(201, { user }, 'Registration successful. Please check your email to verify your account.'));
+});
 
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const { user, accessToken, refreshToken } = await authService.verifyEmail({ email, otp });
   res
-    .status(201)
+    .status(200)
     .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
     .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
-    .json(new ApiResponse(201, { user, accessToken, refreshToken }, 'Registered successfully'));
+    .json(new ApiResponse(200, { user, accessToken, refreshToken }, 'Email verified successfully'));
 });
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const { user, accessToken, refreshToken } = await authService.login({ email, password });
-
   res
     .status(200)
     .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
@@ -42,7 +46,6 @@ const logout = asyncHandler(async (req, res) => {
 const refreshToken = asyncHandler(async (req, res) => {
   const token = req.cookies?.refreshToken || req.body.refreshToken;
   const { accessToken, refreshToken: newRefresh } = await authService.refreshAccessToken(token);
-
   res
     .status(200)
     .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 })
@@ -65,4 +68,4 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, req.user, 'User fetched'));
 });
 
-module.exports = { register, login, logout, refreshToken, forgotPassword, resetPassword, getMe };
+module.exports = { register, verifyEmail, login, logout, refreshToken, forgotPassword, resetPassword, getMe };

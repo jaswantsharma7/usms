@@ -12,9 +12,18 @@ try {
 export const registerUser = createAsyncThunk('auth/register', async (data, { rejectWithValue }) => {
   try {
     const res = await api.post('/auth/register', data);
-    return res.data.data;
+    return res.data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Registration failed');
+  }
+});
+
+export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, otp }, { rejectWithValue }) => {
+  try {
+    const res = await api.post('/auth/verify-email', { email, otp });
+    return res.data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Verification failed');
   }
 });
 
@@ -52,12 +61,16 @@ const authSlice = createSlice({
     refreshToken: stored?.refreshToken || null,
     loading: false,
     error: null,
+    registrationPending: false,
+    pendingEmail: null,
   },
   reducers: {
     logout(state) {
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
+      state.registrationPending = false;
+      state.pendingEmail = null;
       localStorage.removeItem('auth');
     },
     setTokens(state, action) {
@@ -71,6 +84,9 @@ const authSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    clearRegistrationPending(state) {
+      state.registrationPending = false;
+    },
   },
   extraReducers: (builder) => {
     const pending = (state) => { state.loading = true; state.error = null; };
@@ -80,13 +96,26 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, pending)
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.registrationPending = true;
+        state.pendingEmail = action.meta.arg.email;
+        toast.success('Account created! Check your email for your OTP.');
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        rejected(state, action);
+        toast.error(action.payload);
+      })
+      .addCase(verifyEmail.pending, pending)
+      .addCase(verifyEmail.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.registrationPending = false;
+        state.pendingEmail = null;
         try { localStorage.setItem('auth', JSON.stringify(action.payload)); } catch {}
-        toast.success('Registered successfully!');
+        toast.success('Email verified! Welcome to USMS.');
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(verifyEmail.rejected, (state, action) => {
         rejected(state, action);
         toast.error(action.payload);
       })
@@ -115,5 +144,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setTokens, clearError } = authSlice.actions;
+export const { logout, setTokens, clearError, clearRegistrationPending } = authSlice.actions;
 export default authSlice.reducer;

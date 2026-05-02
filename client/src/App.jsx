@@ -16,6 +16,7 @@ const LoginPage        = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage     = lazy(() => import('./pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage  = lazy(() => import('./pages/auth/ResetPasswordPage'));
+const VerifyEmailPage    = lazy(() => import('./pages/auth/VerifyEmailPage'));
 const DashboardPage    = lazy(() => import('./pages/dashboard/DashboardPage'));
 const StudentsPage     = lazy(() => import('./pages/students/StudentsPage'));
 const StudentDetailPage = lazy(() => import('./pages/students/StudentDetailPage'));
@@ -78,6 +79,7 @@ function App() {
       <Route path="/register"       element={<SafePage>{!user ? <RegisterPage /> : <Navigate to="/dashboard" />}</SafePage>} />
       <Route path="/forgot-password" element={<SafePage><ForgotPasswordPage /></SafePage>} />
       <Route path="/reset-password/:token" element={<SafePage><ResetPasswordPage /></SafePage>} />
+      <Route path="/verify-email" element={<SafePage><VerifyEmailPage /></SafePage>} />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>

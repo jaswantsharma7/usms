@@ -2,17 +2,58 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
-const { sendEmail, passwordResetEmail } = require('../utils/email');
+const { sendEmail, verificationEmail, passwordResetEmail } = require('../utils/email');
 
 const register = async ({ name, email, password, role }) => {
-  const existing = await User.findOne({ email });
-  if (existing) throw new ApiError(409, 'Email already registered');
+  const existing = await User.findOne({ email }).select('+password');
+  if (existing) {
+    if (existing.isEmailVerified) throw new ApiError(409, 'Email already registered');
+    // Unverified: update creds and resend
+    existing.name = name;
+    existing.password = password;
+    existing.role = role || existing.role;
+    const otp = existing.createEmailVerificationOtp();
+    await existing.save();
+    await sendEmail({ to: existing.email, ...verificationEmail(existing.name, otp) });
+    return { user: existing };
+  }
 
   const user = await User.create({ name, email, password, role: role || 'student' });
 
+  const otp = user.createEmailVerificationOtp();
+  await user.save({ validateBeforeSave: false });
+  try {
+    await sendEmail({ to: user.email, ...verificationEmail(user.name, otp) });
+  } catch {
+    user.emailVerificationOtp = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    throw new ApiError(500, 'Could not send verification email. Try again.');
+  }
+
+  return { user };
+};
+
+const verifyEmail = async ({ email, otp }) => {
+  const user = await User.findOne({ email }).select('+emailVerificationOtp +emailVerificationExpires');
+  if (!user) throw new ApiError(400, 'No account found with this email');
+  if (user.isEmailVerified) throw new ApiError(400, 'Email already verified');
+  if (!user.emailVerificationOtp || !user.emailVerificationExpires)
+    throw new ApiError(400, 'No OTP found. Please register again.');
+  if (user.emailVerificationExpires < Date.now())
+    throw new ApiError(400, 'OTP has expired. Please register again.');
+
+  const hashed = crypto.createHash('sha256').update(otp).digest('hex');
+  if (hashed !== user.emailVerificationOtp)
+    throw new ApiError(400, 'Invalid OTP');
+
+  user.isEmailVerified = true;
+  user.emailVerificationOtp = undefined;
+  user.emailVerificationExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
   const accessToken = generateAccessToken({ id: user._id, role: user.role });
   const refreshToken = generateRefreshToken({ id: user._id });
-
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
 
@@ -23,6 +64,7 @@ const login = async ({ email, password }) => {
   const user = await User.findOne({ email }).select('+password');
   if (!user) throw new ApiError(401, 'Invalid credentials');
   if (!user.isActive) throw new ApiError(401, 'Account is deactivated');
+  if (!user.isEmailVerified) throw new ApiError(403, 'Please verify your email before logging in');
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) throw new ApiError(401, 'Invalid credentials');
@@ -84,7 +126,7 @@ const forgotPassword = async (email, resetUrlBase) => {
     throw new ApiError(500, 'Email could not be sent');
   }
 
-  return resetToken; // return for dev/test purposes
+  return resetToken;
 };
 
 const resetPassword = async (token, password) => {
@@ -105,4 +147,4 @@ const resetPassword = async (token, password) => {
   return user;
 };
 
-module.exports = { register, login, refreshAccessToken, logout, forgotPassword, resetPassword };
+module.exports = { register, verifyEmail, login, refreshAccessToken, logout, forgotPassword, resetPassword };

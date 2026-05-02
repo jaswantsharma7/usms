@@ -11,6 +11,7 @@ const {
 } = require('../validators/auth.validator');
 
 router.post('/register', registerValidator, validate, ctrl.register);
+router.post('/verify-email', ctrl.verifyEmail);
 router.post('/login', loginValidator, validate, ctrl.login);
 router.post('/logout', protect, ctrl.logout);
 router.post('/refresh-token', ctrl.refreshToken);

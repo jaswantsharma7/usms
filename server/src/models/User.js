@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationOtp: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
     lastLogin: {
       type: Date,
     },
@@ -83,6 +86,13 @@ userSchema.methods.createPasswordResetToken = function () {
     .digest('hex');
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   return resetToken;
+};
+
+userSchema.methods.createEmailVerificationOtp = function () {
+  const otp = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit
+  this.emailVerificationOtp = require("crypto").createHash("sha256").update(otp).digest("hex");
+  this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 min
+  return otp;
 };
 
 // Remove sensitive fields from JSON output

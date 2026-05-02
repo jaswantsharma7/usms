@@ -1,17 +1,19 @@
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { registerUser } from '../../features/auth/authSlice';
 
 const RegisterPage = () => {
   const dispatch = useDispatch();
-  const { loading } = useSelector((s) => s.auth);
+  const { loading, registrationPending } = useSelector((s) => s.auth);
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
   const onSubmit = (data) => {
     const { confirmPassword, ...rest } = data;
     dispatch(registerUser(rest));
   };
+
+  if (registrationPending) return <Navigate to="/verify-email" />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-900 to-primary-700 p-4">
