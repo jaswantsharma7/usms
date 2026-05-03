@@ -1,13 +1,26 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM || 'USMS <noreply@yourdomain.com>';
+const createTransporter = () =>
+  nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    const { error } = await resend.emails.send({ from: FROM, to, subject, html });
-    if (error) throw new Error(error.message);
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || `"USMS" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html,
+    });
     logger.info(`Email sent to ${to}`);
   } catch (error) {
     logger.error(`Email send failed: ${error.message}`);
@@ -50,7 +63,7 @@ const passwordResetEmail = (name, resetUrl) => ({
       <div style="background:#fff;padding:32px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb">
         <h2 style="color:#111827;margin-top:0">Reset your password</h2>
         <p style="color:#374151">Hi <strong>${name}</strong>,</p>
-        <p style="color:#374151">You requested a password reset. Click the button below:</p>
+        <p style="color:#374151">Click the button below to reset your password:</p>
         <div style="text-align:center;margin:32px 0">
           <a href="${resetUrl}" style="display:inline-block;padding:14px 32px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px">
             Reset Password

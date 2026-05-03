@@ -128,7 +128,7 @@ async function seed(){
   console.log('Cleared');
 
   // Admin
-  await User.create({name:'Admin User',email:'admin@usms.com',password:'Admin@123',role:'admin',isActive:true});
+  await User.create({name:'Admin User',email:'admin@usms.com',password:'Admin@123',role:'admin',isActive:true,isEmailVerified:true});
   console.log('Admin: admin@usms.com / Admin@123');
 
   // Faculty (50)
@@ -138,7 +138,7 @@ async function seed(){
   for(const dept of DEPARTMENTS){
     for(let i=0;i<10;i++){
       const name=nextName();
-      const uDoc=await User.create({name,email:`${slug(name.split(' ')[0])}.f${fc}@usms.com`,password:'Faculty@123',role:'faculty',isActive:true});
+      const uDoc=await User.create({name,email:`${slug(name.split(' ')[0])}.f${fc}@usms.com`,password:'Faculty@123',role:'faculty',isActive:true,isEmailVerified:true});
       const fDoc=await Faculty.create({
         userId:uDoc._id,facultyId:`FAC${String(fc).padStart(4,'0')}`,department:dept,
         designation:pick(DESIGNATIONS),specialization:[pick(DEPT_SPEC[dept])],
@@ -181,7 +181,7 @@ async function seed(){
     const prog=PROGRAMS[dept];const bList=BATCHES[prog];
     for(let i=0;i<40;i++){
       const name=nextName();
-      const uDoc=await User.create({name,email:`${slug(name.split(' ')[0])}.s${sc}@usms.com`,password:'Student@123',role:'student',isActive:true});
+      const uDoc=await User.create({name,email:`${slug(name.split(' ')[0])}.s${sc}@usms.com`,password:'Student@123',role:'student',isActive:true,isEmailVerified:true});
       const sem=rand(1,8);const batch=pick(bList);
       const sDoc=await Student.create({
         userId:uDoc._id,studentId:`STU${String(sc).padStart(5,'0')}`,
@@ -261,7 +261,7 @@ async function seed(){
 
   console.log(`
 ╔═══════════════════════════════════════════════╗
-║           SEED COMPLETE ✅                    ║
+║           SEED COMPLETE                       ║
 ╠═══════════════════════════════════════════════╣
 ║  admin@usms.com       → Admin@123             ║
 ║  <name>.fN@usms.com   → Faculty@123           ║
