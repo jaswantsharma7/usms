@@ -53,6 +53,7 @@ const studentSlice = createSlice({
     students: [],
     student: null,
     myProfile: null,
+    myProfileNotFound: false,
     pagination: null,
     loading: false,
     error: null,
@@ -64,7 +65,8 @@ const studentSlice = createSlice({
       .addCase(fetchStudents.fulfilled, (s, a) => { s.loading = false; s.students = a.payload.students; s.pagination = a.payload.pagination; })
       .addCase(fetchStudents.rejected, (s, a) => { s.loading = false; s.error = a.payload; })
       .addCase(fetchStudentById.fulfilled, (s, a) => { s.student = a.payload; })
-      .addCase(fetchMyStudentProfile.fulfilled, (s, a) => { s.myProfile = a.payload; })
+      .addCase(fetchMyStudentProfile.fulfilled, (s, a) => { s.myProfile = a.payload; s.myProfileNotFound = false; })
+      .addCase(fetchMyStudentProfile.rejected, (s) => { s.myProfileNotFound = true; })
       .addCase(createStudent.fulfilled, (s, a) => { s.students.unshift(a.payload.student); })
       .addCase(updateStudent.fulfilled, (s, a) => { s.students = s.students.map(st => st._id === a.payload._id ? a.payload : st); })
       .addCase(deleteStudent.fulfilled, (s, a) => { s.students = s.students.filter(st => st._id !== a.payload); });

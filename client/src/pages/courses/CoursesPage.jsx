@@ -23,7 +23,7 @@ export const CoursesPage = () => {
   const navigate = useNavigate();
   const { courses, pagination, loading } = useSelector((s) => s.courses);
   const { user } = useSelector((s) => s.auth);
-  const { myProfile } = useSelector((s) => s.students);
+  const { myProfile, myProfileNotFound } = useSelector((s) => s.students);
 
   const [search, setSearch] = useState('');
   const [dept, setDept] = useState('');
@@ -32,6 +32,7 @@ export const CoursesPage = () => {
   const [enrollId, setEnrollId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  const [showNotRegistered, setShowNotRegistered] = useState(false);
 
   const load = useCallback(() => {
     dispatch(fetchCourses({ page, search, department: dept }));
@@ -101,7 +102,7 @@ export const CoursesPage = () => {
                     <MdVisibility size={16} />
                   </button>
                   {user?.role === 'student' && c.status === 'active' && (
-                    <button onClick={() => setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
+                    <button onClick={() => myProfileNotFound ? setShowNotRegistered(true) : setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
                       <MdPersonAdd size={16} />
                     </button>
                   )}
@@ -121,6 +122,30 @@ export const CoursesPage = () => {
       <Pagination pagination={pagination} onPageChange={setPage} />
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} loading={deleting} title="Delete Course" message="Are you sure you want to delete this course?" />
       <ConfirmDialog open={!!enrollId} onClose={() => setEnrollId(null)} onConfirm={handleEnroll} loading={enrolling} title="Enroll in Course" message="Confirm enrollment in this course?" confirmText="Enroll" />
+
+      <Modal open={showNotRegistered} onClose={() => setShowNotRegistered(false)} title="Account Not Yet Activated" size="sm">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-3xl">⏳</span>
+          </div>
+          <div>
+            <p className="text-gray-700 font-medium mb-2">Your student profile is pending admin approval</p>
+            <p className="text-gray-500 text-sm">
+              You have successfully registered, but your account has not yet been approved by an administrator.
+              You will be able to enroll in courses once your profile is activated.
+            </p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-left">
+            <p className="text-blue-800 text-xs font-medium mb-1">What to do next?</p>
+            <ul className="text-blue-700 text-xs space-y-1 list-disc list-inside">
+              <li>Contact your university admin or department office</li>
+              <li>Provide your registered email to get your profile linked</li>
+              <li>Try enrolling again after your profile is activated</li>
+            </ul>
+          </div>
+          <button onClick={() => setShowNotRegistered(false)} className="btn-primary w-full">Got it</button>
+        </div>
+      </Modal>
     </div>
   );
 };
