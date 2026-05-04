@@ -3,6 +3,7 @@ const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
 const { sendEmail, verificationEmail, passwordResetEmail } = require('../utils/email');
+const logger = require('../utils/logger');
 
 const register = async ({ name, email, password, role }) => {
   const existing = await User.findOne({ email }).select('+password');
@@ -24,11 +25,12 @@ const register = async ({ name, email, password, role }) => {
   await user.save({ validateBeforeSave: false });
   try {
     await sendEmail({ to: user.email, ...verificationEmail(user.name, otp) });
-  } catch {
+  } catch (err) {
+    logger.error(`[register] sendEmail failed: ${err.message}`);
     user.emailVerificationOtp = undefined;
     user.emailVerificationExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    throw new ApiError(500, 'Could not send verification email. Try again.');
+    throw new ApiError(500, `Could not send verification email: ${err.message}`);
   }
 
   return { user };
@@ -119,11 +121,12 @@ const forgotPassword = async (email, resetUrlBase) => {
 
   try {
     await sendEmail({ to: user.email, ...emailContent });
-  } catch {
+  } catch (err) {
+    logger.error(`[forgotPassword] sendEmail failed: ${err.message}`);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    throw new ApiError(500, 'Email could not be sent');
+    throw new ApiError(500, `Email could not be sent: ${err.message}`);
   }
 
   return resetToken;

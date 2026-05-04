@@ -1,31 +1,58 @@
-const nodemailer = require('nodemailer');
+const https = require('https');
 const logger = require('./logger');
 
-const createTransporter = () =>
-  nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+const sendEmail = ({ to, subject, html }) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new Error('BREVO_API_KEY not set in environment');
+
+  const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'no-reply@usms.app';
+  const fromName  = process.env.EMAIL_FROM_NAME    || 'USMS';
+
+  const payload = JSON.stringify({
+    sender:      { name: fromName, email: fromEmail },
+    to:          [{ email: to }],
+    subject,
+    htmlContent: html,
   });
 
-const sendEmail = async ({ to, subject, html }) => {
-  try {
-    const transporter = createTransporter();
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || `"USMS" <${process.env.SMTP_USER}>`,
-      to,
-      subject,
-      html,
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: 'api.brevo.com',
+        path:     '/v3/smtp/email',
+        method:   'POST',
+        headers: {
+          'accept':         'application/json',
+          'api-key':        apiKey,
+          'content-type':   'application/json',
+          'content-length': Buffer.byteLength(payload),
+        },
+      },
+      (res) => {
+        let body = '';
+        res.on('data', (chunk) => (body += chunk));
+        res.on('end', () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            logger.info(`Email sent to ${to}`);
+            resolve();
+          } else {
+            let msg = `Brevo API error ${res.statusCode}`;
+            try { msg = JSON.parse(body).message || msg; } catch {}
+            logger.error(`Email send failed: ${msg}`);
+            reject(new Error(msg));
+          }
+        });
+      }
+    );
+
+    req.on('error', (err) => {
+      logger.error(`Email send failed: ${err.message}`);
+      reject(err);
     });
-    logger.info(`Email sent to ${to}`);
-  } catch (error) {
-    logger.error(`Email send failed: ${error.message}`);
-    throw new Error('Email could not be sent');
-  }
+
+    req.write(payload);
+    req.end();
+  });
 };
 
 const verificationEmail = (name, otp) => ({
