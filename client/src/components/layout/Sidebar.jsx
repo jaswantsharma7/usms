@@ -124,4 +124,3 @@ const Sidebar = ({ open, onClose }) => {
 };
 
 export default Sidebar;
-
