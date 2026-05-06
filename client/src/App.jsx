@@ -35,6 +35,7 @@ const CourseGradesPage = lazy(() => import('./pages/grades/CourseGradesPage'));
 const TimetablePage    = lazy(() => import('./pages/timetable/TimetablePage'));
 const NotificationsPage = lazy(() => import('./pages/notifications/NotificationsPage'));
 const ProfilePage      = lazy(() => import('./pages/profile/ProfilePage'));
+const PendingRegistrationsPage = lazy(() => import('./pages/admin/PendingRegistrationsPage'));
 
 // Per-route loading spinner
 const PageLoader = () => (
@@ -107,6 +108,7 @@ function App() {
 
           {/* Admin only */}
           <Route element={<RoleRoute roles={['admin']} />}>
+            <Route path="/registrations"        element={<SafePage><PendingRegistrationsPage /></SafePage>} />
             <Route path="/students/new"         element={<SafePage><StudentFormPage /></SafePage>} />
             <Route path="/students/:id/edit"    element={<SafePage><StudentFormPage /></SafePage>} />
             <Route path="/faculty/new"          element={<SafePage><FacultyFormPage /></SafePage>} />

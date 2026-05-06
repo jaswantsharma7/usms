@@ -59,6 +59,7 @@ const authSlice = createSlice({
     user: stored?.user || null,
     accessToken: stored?.accessToken || null,
     refreshToken: stored?.refreshToken || null,
+    profileLinked: stored?.profileLinked ?? null,
     loading: false,
     error: null,
     registrationPending: false,
@@ -69,6 +70,7 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
+      state.profileLinked = null;
       state.registrationPending = false;
       state.pendingEmail = null;
       localStorage.removeItem('auth');
@@ -110,6 +112,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.profileLinked = action.payload.profileLinked ?? null;
         state.registrationPending = false;
         state.pendingEmail = null;
         try { localStorage.setItem('auth', JSON.stringify(action.payload)); } catch {}
@@ -125,6 +128,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.profileLinked = action.payload.profileLinked ?? null;
         try { localStorage.setItem('auth', JSON.stringify(action.payload)); } catch {}
         toast.success('Welcome back!');
       })
@@ -140,6 +144,13 @@ const authSlice = createSlice({
       })
       .addCase(getMe.fulfilled, (state, action) => {
         state.user = action.payload;
+        if (action.payload?.profileLinked !== undefined) {
+          state.profileLinked = action.payload.profileLinked;
+          try {
+            const prev = JSON.parse(localStorage.getItem('auth') || '{}');
+            localStorage.setItem('auth', JSON.stringify({ ...prev, profileLinked: action.payload.profileLinked }));
+          } catch {}
+        }
       });
   },
 });

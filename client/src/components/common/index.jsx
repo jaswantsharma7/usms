@@ -155,3 +155,5 @@ export const statusColor = (status) => {
   };
   return map[status] || 'gray';
 };
+
+export { default as PendingApprovalBanner } from './PendingApprovalBanner';

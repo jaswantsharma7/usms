@@ -1,8 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchPendingCount } from '../../features/registrations/registrationSlice';
 import {
   MdDashboard, MdPeople, MdSchool, MdBook, MdCalendarToday,
-  MdAssignment, MdGrade, MdNotifications, MdPerson, MdClose,
+  MdAssignment, MdGrade, MdNotifications, MdPerson, MdClose, MdHowToReg,
 } from 'react-icons/md';
 
 const navItems = {
@@ -10,6 +13,7 @@ const navItems = {
     { to: '/dashboard', icon: MdDashboard, label: 'Dashboard' },
     { to: '/students', icon: MdPeople, label: 'Students' },
     { to: '/faculty', icon: MdSchool, label: 'Faculty' },
+    { to: '/registrations', icon: MdHowToReg, label: 'Registrations', badge: true },
     { to: '/courses', icon: MdBook, label: 'Courses' },
     { to: '/attendance', icon: MdCalendarToday, label: 'Attendance' },
     { to: '/grades', icon: MdGrade, label: 'Grades' },
@@ -40,8 +44,14 @@ const navItems = {
 };
 
 const Sidebar = ({ open, onClose }) => {
+  const dispatch = useDispatch();
   const { user } = useSelector((s) => s.auth);
+  const { pendingCount } = useSelector((s) => s.registrations);
   const items = navItems[user?.role] || navItems.student;
+
+  useEffect(() => {
+    if (user?.role === 'admin') dispatch(fetchPendingCount());
+  }, [user?.role]);
 
   return (
     <>
@@ -85,7 +95,7 @@ const Sidebar = ({ open, onClose }) => {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {items.map(({ to, icon: Icon, label }) => (
+          {items.map(({ to, icon: Icon, label, badge }) => (
             <NavLink
               key={to}
               to={to}
@@ -99,7 +109,12 @@ const Sidebar = ({ open, onClose }) => {
               }
             >
               <Icon size={20} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge && pendingCount > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {pendingCount > 9 ? '9+' : pendingCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -109,3 +124,4 @@ const Sidebar = ({ open, onClose }) => {
 };
 
 export default Sidebar;
+

@@ -10,6 +10,7 @@ import gradeReducer from '../features/grades/gradeSlice';
 import notificationReducer from '../features/notifications/notificationSlice';
 import timetableReducer from '../features/timetable/timetableSlice';
 import dashboardReducer from '../features/dashboard/dashboardSlice';
+import registrationReducer from '../features/registrations/registrationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,5 +25,6 @@ export const store = configureStore({
     notifications: notificationReducer,
     timetable: timetableReducer,
     dashboard: dashboardReducer,
+    registrations: registrationReducer,
   },
 });

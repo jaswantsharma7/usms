@@ -8,7 +8,6 @@ import {
 } from '../../features/courses/courseSlice';
 import { fetchFaculty } from '../../features/faculty/facultySlice';
 import { enrollInCourse } from '../../features/enrollment/enrollmentSlice';
-import { fetchMyStudentProfile } from '../../features/students/studentSlice';
 import { MdAdd, MdEdit, MdDelete, MdVisibility, MdPersonAdd } from 'react-icons/md';
 import {
   PageHeader, SearchBar, Badge, Pagination, LoadingScreen,
@@ -22,8 +21,8 @@ export const CoursesPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { courses, pagination, loading } = useSelector((s) => s.courses);
-  const { user } = useSelector((s) => s.auth);
-  const { myProfile, myProfileNotFound } = useSelector((s) => s.students);
+  const { user, profileLinked } = useSelector((s) => s.auth);
+  const { myProfileNotFound } = useSelector((s) => s.students);
 
   const [search, setSearch] = useState('');
   const [dept, setDept] = useState('');
@@ -41,8 +40,8 @@ export const CoursesPage = () => {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (user?.role === 'student') dispatch(fetchMyStudentProfile());
-  }, [user]);
+    // No longer call fetchMyStudentProfile — profileLinked comes from authSlice via /auth/me
+  }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -102,7 +101,7 @@ export const CoursesPage = () => {
                     <MdVisibility size={16} />
                   </button>
                   {user?.role === 'student' && c.status === 'active' && (
-                    <button onClick={() => myProfileNotFound ? setShowNotRegistered(true) : setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
+                    <button onClick={() => (profileLinked === false) ? setShowNotRegistered(true) : setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
                       <MdPersonAdd size={16} />
                     </button>
                   )}
@@ -131,7 +130,7 @@ export const CoursesPage = () => {
           <div>
             <p className="text-gray-700 font-medium mb-2">Your student profile is pending admin approval</p>
             <p className="text-gray-500 text-sm">
-              You have successfully registered, but your account has not yet been approved by an administrator.
+              You have successfully registered, but your account has not yet been added to the student database by an administrator.
               You will be able to enroll in courses once your profile is activated.
             </p>
           </div>

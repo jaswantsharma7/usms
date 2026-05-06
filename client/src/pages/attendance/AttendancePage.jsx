@@ -2,18 +2,27 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchMyAttendanceSummary } from '../../features/attendance/attendanceSlice';
-import { PageHeader, LoadingScreen, Badge } from '../../components/common';
+import { PageHeader, LoadingScreen, Badge, PendingApprovalBanner } from '../../components/common';
 
 const AttendancePage = () => {
   const dispatch = useDispatch();
   const { summary, loading } = useSelector((s) => s.attendance);
-  const { user } = useSelector((s) => s.auth);
+  const { user, profileLinked } = useSelector((s) => s.auth);
 
   useEffect(() => {
-    if (user?.role === 'student') dispatch(fetchMyAttendanceSummary());
-  }, [user]);
+    if (user?.role === 'student' && profileLinked) dispatch(fetchMyAttendanceSummary());
+  }, [user, profileLinked]);
 
   if (loading) return <LoadingScreen />;
+
+  if (user?.role === 'student' && profileLinked === false) {
+    return (
+      <div>
+        <PageHeader title="My Attendance" />
+        <div className="card"><PendingApprovalBanner title="Attendance Unavailable" /></div>
+      </div>
+    );
+  }
 
   if (user?.role === 'faculty' || user?.role === 'admin') {
     return (

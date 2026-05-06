@@ -22,6 +22,7 @@ const gradeRoutes = require('./routes/grade.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const timetableRoutes = require('./routes/timetable.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const registrationRoutes = require('./routes/registration.routes');
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use('/api/v1/grades', gradeRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/registrations', registrationRoutes);
 
 // 404
 app.use(notFound);

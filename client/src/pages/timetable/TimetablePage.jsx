@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMyTimetable, fetchTimetable, createTimetableEntry, deleteTimetableEntry } from '../../features/timetable/timetableSlice';
 import { fetchCourses } from '../../features/courses/courseSlice';
 import { fetchFaculty } from '../../features/faculty/facultySlice';
-import { PageHeader, LoadingScreen, Modal, ConfirmDialog } from '../../components/common';
+import { PageHeader, LoadingScreen, Modal, ConfirmDialog, PendingApprovalBanner } from '../../components/common';
 import { useForm } from 'react-hook-form';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -21,7 +21,7 @@ const TimetablePage = () => {
   const { entries, loading } = useSelector((s) => s.timetable);
   const { courses } = useSelector((s) => s.courses);
   const { faculty } = useSelector((s) => s.faculty);
-  const { user } = useSelector((s) => s.auth);
+  const { user, profileLinked } = useSelector((s) => s.auth);
 
   const [addModal, setAddModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -30,12 +30,13 @@ const TimetablePage = () => {
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
 
   useEffect(() => {
+    if (profileLinked === false && user?.role === 'student') return;
     dispatch(fetchMyTimetable());
     if (user?.role === 'admin') {
       dispatch(fetchCourses({ limit: 100 }));
       dispatch(fetchFaculty({ limit: 100 }));
     }
-  }, [user]);
+  }, [user, profileLinked]);
 
   const byDay = DAYS.reduce((acc, day) => {
     acc[day] = entries.filter(e => e.day === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -57,6 +58,15 @@ const TimetablePage = () => {
   };
 
   if (loading) return <LoadingScreen />;
+
+  if (user?.role === 'student' && profileLinked === false) {
+    return (
+      <div>
+        <PageHeader title="My Timetable" />
+        <div className="card"><PendingApprovalBanner title="Timetable Unavailable" /></div>
+      </div>
+    );
+  }
 
   return (
     <div>

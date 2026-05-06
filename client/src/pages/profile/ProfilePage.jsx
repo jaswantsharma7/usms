@@ -5,11 +5,11 @@ import { updateMyProfile } from '../../features/users/userSlice';
 import { getMe } from '../../features/auth/authSlice';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { PageHeader } from '../../components/common';
+import { PageHeader, PendingApprovalBanner } from '../../components/common';
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((s) => s.auth);
+  const { user, profileLinked } = useSelector((s) => s.auth);
   const [activeTab, setActiveTab] = useState('profile');
   const [avatarFile, setAvatarFile] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -59,6 +59,13 @@ const ProfilePage = () => {
   return (
     <div>
       <PageHeader title="My Profile" />
+
+      {/* Show pending approval notice for unapproved students/faculty */}
+      {['student', 'faculty'].includes(user?.role) && profileLinked === false && (
+        <div className="mb-6 max-w-2xl">
+          <PendingApprovalBanner compact />
+        </div>
+      )}
 
       <div className="max-w-2xl">
         {/* Tabs */}

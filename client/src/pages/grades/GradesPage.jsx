@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchMyGrades } from '../../features/grades/gradeSlice';
-import { PageHeader, LoadingScreen, Badge } from '../../components/common';
+import { PageHeader, LoadingScreen, Badge, PendingApprovalBanner } from '../../components/common';
 
 const gradeColor = (grade) => {
   if (!grade) return 'gray';
@@ -15,11 +15,11 @@ const gradeColor = (grade) => {
 const GradesPage = () => {
   const dispatch = useDispatch();
   const { myGrades, loading } = useSelector((s) => s.grades);
-  const { user } = useSelector((s) => s.auth);
+  const { user, profileLinked } = useSelector((s) => s.auth);
 
   useEffect(() => {
-    if (user?.role === 'student') dispatch(fetchMyGrades());
-  }, [user]);
+    if (user?.role === 'student' && profileLinked) dispatch(fetchMyGrades());
+  }, [user, profileLinked]);
 
   if (loading) return <LoadingScreen />;
 
@@ -33,6 +33,15 @@ const GradesPage = () => {
           </p>
           <Link to="/courses" className="btn-primary inline-block">View My Courses</Link>
         </div>
+      </div>
+    );
+  }
+
+  if (user?.role === 'student' && profileLinked === false) {
+    return (
+      <div>
+        <PageHeader title="My Grades" />
+        <div className="card"><PendingApprovalBanner title="Grades Unavailable" /></div>
       </div>
     );
   }
