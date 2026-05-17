@@ -76,6 +76,19 @@ const RegisterPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input {...register('phone')} className="input-field" placeholder="+91 ..." />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                <input {...register('dateOfBirth')} type="date" className="input-field" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                <select {...register('gender')} className="input-field">
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
             </div>
 
             {selectedRole === 'student' && (

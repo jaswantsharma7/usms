@@ -1,17 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  fetchCourses, fetchCourseById, createCourse, updateCourse,
-  deleteCourse, assignFacultyToCourse,
+  fetchCourses,
+  deleteCourse,
 } from '../../features/courses/courseSlice';
-import { fetchFaculty } from '../../features/faculty/facultySlice';
+import { fetchMyStudentProfile } from '../../features/students/studentSlice';
 import { enrollInCourse } from '../../features/enrollment/enrollmentSlice';
 import { MdAdd, MdEdit, MdDelete, MdVisibility, MdPersonAdd } from 'react-icons/md';
 import {
   PageHeader, SearchBar, Badge, Pagination, LoadingScreen,
-  ConfirmDialog, EmptyState, Modal, statusColor,
+  ConfirmDialog, EmptyState, statusColor, PendingApprovalBanner,
 } from '../../components/common';
 
 const DEPARTMENTS = ['Computer Science','Electrical Engineering','Mechanical Engineering',
@@ -22,7 +21,7 @@ export const CoursesPage = () => {
   const navigate = useNavigate();
   const { courses, pagination, loading } = useSelector((s) => s.courses);
   const { user, profileLinked } = useSelector((s) => s.auth);
-  const { myProfileNotFound } = useSelector((s) => s.students);
+  const { myProfile } = useSelector((s) => s.students);
 
   const [search, setSearch] = useState('');
   const [dept, setDept] = useState('');
@@ -31,17 +30,29 @@ export const CoursesPage = () => {
   const [enrollId, setEnrollId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
-  const [showNotRegistered, setShowNotRegistered] = useState(false);
 
+  // Only fetch courses if student is registered (profileLinked=true) or non-student role
   const load = useCallback(() => {
+    if (user?.role === 'student' && !profileLinked) return;
     dispatch(fetchCourses({ page, search, department: dept }));
-  }, [page, search, dept]);
+  }, [page, search, dept, user, profileLinked]);
 
   useEffect(() => { load(); }, [load]);
 
+  // Only fetch student profile if registered
   useEffect(() => {
-    // No longer call fetchMyStudentProfile — profileLinked comes from authSlice via /auth/me
-  }, []);
+    if (user?.role === 'student' && profileLinked) dispatch(fetchMyStudentProfile());
+  }, [user, profileLinked]);
+
+  // Show banner for unregistered students — no API calls have fired at this point
+  if (user?.role === 'student' && profileLinked === false) {
+    return (
+      <div>
+        <PageHeader title="Courses" />
+        <div className="card"><PendingApprovalBanner title="Courses Unavailable" /></div>
+      </div>
+    );
+  }
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -101,7 +112,7 @@ export const CoursesPage = () => {
                     <MdVisibility size={16} />
                   </button>
                   {user?.role === 'student' && c.status === 'active' && (
-                    <button onClick={() => (profileLinked === false) ? setShowNotRegistered(true) : setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
+                    <button onClick={() => setEnrollId(c._id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Enroll">
                       <MdPersonAdd size={16} />
                     </button>
                   )}
@@ -121,30 +132,6 @@ export const CoursesPage = () => {
       <Pagination pagination={pagination} onPageChange={setPage} />
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} loading={deleting} title="Delete Course" message="Are you sure you want to delete this course?" />
       <ConfirmDialog open={!!enrollId} onClose={() => setEnrollId(null)} onConfirm={handleEnroll} loading={enrolling} title="Enroll in Course" message="Confirm enrollment in this course?" confirmText="Enroll" />
-
-      <Modal open={showNotRegistered} onClose={() => setShowNotRegistered(false)} title="Account Not Yet Activated" size="sm">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-            <span className="text-3xl">⏳</span>
-          </div>
-          <div>
-            <p className="text-gray-700 font-medium mb-2">Your student profile is pending admin approval</p>
-            <p className="text-gray-500 text-sm">
-              You have successfully registered, but your account has not yet been added to the student database by an administrator.
-              You will be able to enroll in courses once your profile is activated.
-            </p>
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-left">
-            <p className="text-blue-800 text-xs font-medium mb-1">What to do next?</p>
-            <ul className="text-blue-700 text-xs space-y-1 list-disc list-inside">
-              <li>Contact your university admin or department office</li>
-              <li>Provide your registered email to get your profile linked</li>
-              <li>Try enrolling again after your profile is activated</li>
-            </ul>
-          </div>
-          <button onClick={() => setShowNotRegistered(false)} className="btn-primary w-full">Got it</button>
-        </div>
-      </Modal>
     </div>
   );
 };

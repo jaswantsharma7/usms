@@ -15,7 +15,7 @@ const getProfileLinked = async (userId, role) => {
   return false;
 };
 
-const register = async ({ name, email, password, role, department, phone, program, semester, batch, designation, qualification, experience }) => {
+const register = async ({ name, email, password, role, department, phone, dateOfBirth, gender, program, semester, batch, designation, qualification, experience }) => {
   const existing = await User.findOne({ email }).select('+password');
   if (existing) {
     if (existing.isEmailVerified) throw new ApiError(409, 'Email already registered');
@@ -39,6 +39,8 @@ const register = async ({ name, email, password, role, department, phone, progra
         role: user.role,
         department,
         phone,
+        dateOfBirth: dateOfBirth || undefined,
+        gender: gender || undefined,
         program,
         semester: semester ? Number(semester) : undefined,
         batch,

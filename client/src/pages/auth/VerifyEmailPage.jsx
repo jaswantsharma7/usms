@@ -49,7 +49,7 @@ const VerifyEmailPage = () => {
           <p className="text-primary-200 mt-2">University Student Management System</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@ const VerifyEmailPage = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="flex gap-2 justify-center mb-6" onPaste={handlePaste}>
+            <div className="flex gap-2 justify-center mb-6 w-full" onPaste={handlePaste}>
               {digits.map((d, i) => (
                 <input
                   key={i}
@@ -75,7 +75,7 @@ const VerifyEmailPage = () => {
                   value={d}
                   onChange={(e) => handleChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="w-12 h-14 text-center text-xl font-bold border-2 rounded-lg outline-none transition-colors
+                  className="flex-1 min-w-0 max-w-[3rem] h-12 sm:h-14 text-center text-xl font-bold border-2 rounded-lg outline-none transition-colors
                     focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                     border-gray-300 text-gray-900"
                 />

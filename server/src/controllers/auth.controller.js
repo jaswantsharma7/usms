@@ -9,8 +9,8 @@ const cookieOptions = {
 };
 
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role, department, phone, program, semester, batch, designation, qualification, experience } = req.body;
-  const { user } = await authService.register({ name, email, password, role, department, phone, program, semester, batch, designation, qualification, experience });
+  const { name, email, password, role, department, phone, dateOfBirth, gender, program, semester, batch, designation, qualification, experience } = req.body;
+  const { user } = await authService.register({ name, email, password, role, department, phone, dateOfBirth, gender, program, semester, batch, designation, qualification, experience });
   res.status(201).json(new ApiResponse(201, { user }, 'Registration successful. Please check your email to verify your account.'));
 });
 

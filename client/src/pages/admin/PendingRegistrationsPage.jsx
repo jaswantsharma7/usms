@@ -37,6 +37,7 @@ const PendingRegistrationsPage = () => {
         department: approveTarget.department || '',
         phone: approveTarget.phone || '',
         gender: approveTarget.gender || '',
+        dateOfBirth: approveTarget.dateOfBirth ? new Date(approveTarget.dateOfBirth).toISOString().split('T')[0] : '',
         program: approveTarget.program || '',
         semester: approveTarget.semester || 1,
         batch: approveTarget.batch || '',
@@ -118,6 +119,12 @@ const PendingRegistrationsPage = () => {
                       <p className="text-sm text-gray-500">{u?.email}</p>
                       <div className="flex gap-4 mt-1 text-xs text-gray-400 flex-wrap">
                         <span>Dept: <span className="text-gray-600 font-medium">{reg.department}</span></span>
+                        {reg.gender && (
+                          <span>Gender: <span className="text-gray-600 font-medium capitalize">{reg.gender}</span></span>
+                        )}
+                        {reg.dateOfBirth && (
+                          <span>DOB: <span className="text-gray-600 font-medium">{new Date(reg.dateOfBirth).toLocaleDateString()}</span></span>
+                        )}
                         {reg.role === 'student' && reg.program && (
                           <span>Program: <span className="text-gray-600 font-medium">{reg.program}</span></span>
                         )}
