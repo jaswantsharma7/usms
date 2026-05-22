@@ -40,7 +40,7 @@ const PendingRegistrationsPage = lazy(() => import('./pages/admin/PendingRegistr
 // Per-route loading spinner
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64">
-    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+    <div className="w-8 h-8 border-2 border-primary-300 border-t-primary-500 rounded-full animate-spin" />
   </div>
 );
 

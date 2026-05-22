@@ -42,29 +42,34 @@ const VerifyEmailPage = () => {
   const otp = digits.join('');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-900 to-primary-700 p-4">
-      <div className="w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center bg-surface-subtle p-4"
+      style={{ backgroundImage: 'radial-gradient(ellipse at 15% 10%, rgba(6,182,212,0.12) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(14,116,144,0.10) 0%, transparent 55%)' }}
+    >
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">USMS</h1>
-          <p className="text-primary-200 mt-2">University Student Management System</p>
+          <h1 className="font-display text-5xl text-primary-700 leading-none">USMS</h1>
+          <p className="text-primary-400 mt-2 text-sm font-light tracking-widest uppercase">
+            University Student Management
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+        <div className="bg-white rounded-3xl shadow-card border border-primary-100/60 p-8">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <div className="w-12 h-12 bg-surface-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Check your email</h2>
-            <p className="text-gray-500 mt-2 text-sm">
+            <h2 className="font-display text-2xl text-primary-900">Check your email</h2>
+            <p className="text-primary-400 mt-2 text-xs font-light">
               We sent a 6-digit code to<br />
-              <span className="font-medium text-gray-700">{pendingEmail || 'your email'}</span>
+              <span className="font-medium text-primary-600">{pendingEmail || 'your email'}</span>
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="flex gap-2 justify-center mb-6 w-full" onPaste={handlePaste}>
+            <div className="flex gap-2 justify-center mb-6" onPaste={handlePaste}>
               {digits.map((d, i) => (
                 <input
                   key={i}
@@ -75,27 +80,27 @@ const VerifyEmailPage = () => {
                   value={d}
                   onChange={(e) => handleChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="flex-1 min-w-0 max-w-[3rem] h-12 sm:h-14 text-center text-xl font-bold border-2 rounded-lg outline-none transition-colors
-                    focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-                    border-gray-300 text-gray-900"
+                  className="flex-1 min-w-0 max-w-[3rem] h-12 text-center text-xl font-semibold border-2 rounded-2xl outline-none transition-all
+                    focus:border-primary-400 focus:ring-2 focus:ring-primary-100
+                    border-primary-100 text-primary-900 bg-surface-subtle"
                 />
               ))}
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+              <p className="text-rose-400 text-xs text-center mb-4">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="btn-primary w-full py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-3 disabled:opacity-40"
             >
               {loading ? 'Verifying...' : 'Verify Email'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-400 mt-6">
+          <p className="text-center text-xs text-primary-400 mt-6">
             Wrong email?{' '}
             <Link to="/register" className="text-primary-600 hover:underline font-medium">Register again</Link>
           </p>
