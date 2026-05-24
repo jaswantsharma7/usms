@@ -12,6 +12,7 @@ const {
 
 router.post('/register', registerValidator, validate, ctrl.register);
 router.post('/verify-email', ctrl.verifyEmail);
+router.post('/resend-otp', ctrl.resendOtp);
 router.post('/login', loginValidator, validate, ctrl.login);
 router.post('/logout', protect, ctrl.logout);
 router.post('/refresh-token', ctrl.refreshToken);

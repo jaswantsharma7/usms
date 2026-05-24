@@ -185,4 +185,21 @@ const resetPassword = async (token, password) => {
   return user;
 };
 
-module.exports = { register, verifyEmail, login, refreshAccessToken, logout, forgotPassword, resetPassword };
+const resendOtp = async (email) => {
+  const user = await User.findOne({ email }).select('+emailVerificationOtp +emailVerificationExpires');
+  if (!user) throw new ApiError(404, 'No account found with this email');
+  if (user.isEmailVerified) throw new ApiError(400, 'Email already verified');
+
+  const otp = user.createEmailVerificationOtp();
+  await user.save({ validateBeforeSave: false });
+  try {
+    await sendEmail({ to: user.email, ...verificationEmail(user.name, otp) });
+  } catch (err) {
+    user.emailVerificationOtp = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    throw new ApiError(500, 'Failed to send OTP email');
+  }
+};
+
+module.exports = { register, verifyEmail, login, refreshAccessToken, logout, forgotPassword, resetPassword, resendOtp };

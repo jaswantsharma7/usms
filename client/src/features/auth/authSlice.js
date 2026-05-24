@@ -27,6 +27,15 @@ export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, 
   }
 });
 
+export const resendOtp = createAsyncThunk('auth/resendOtp', async ({ email }, { rejectWithValue }) => {
+  try {
+    const res = await api.post('/auth/resend-otp', { email });
+    return res.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to resend OTP');
+  }
+});
+
 export const loginUser = createAsyncThunk('auth/login', async (data, { rejectWithValue }) => {
   try {
     const res = await api.post('/auth/login', data);
@@ -119,6 +128,15 @@ const authSlice = createSlice({
         toast.success('Email verified! Welcome to USMS.');
       })
       .addCase(verifyEmail.rejected, (state, action) => {
+        rejected(state, action);
+        toast.error(action.payload);
+      })
+      .addCase(resendOtp.pending, pending)
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.loading = false;
+        toast.success('OTP resent! Check your email.');
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
         rejected(state, action);
         toast.error(action.payload);
       })

@@ -1,7 +1,11 @@
-import { useRef, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { verifyEmail } from '../../features/auth/authSlice';
+import { resendOtp } from '../../features/auth/authSlice';
+
+const MAX_RESEND = 3;
+const COOLDOWN_SEC = 60;
 
 const VerifyEmailPage = () => {
   const dispatch = useDispatch();
@@ -9,6 +13,34 @@ const VerifyEmailPage = () => {
   const { loading, error, pendingEmail } = useSelector((s) => s.auth);
   const [digits, setDigits] = useState(['','','','','','']);
   const inputs = useRef([]);
+  const [resendCount, setResendCount] = useState(0);
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  const startTimer = () => {
+    setTimer(COOLDOWN_SEC);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimer((t) => {
+        if (t <= 1) { clearInterval(timerRef.current); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResend = () => {
+    if (resendCount >= MAX_RESEND || timer > 0 || loading) return;
+    dispatch(resendOtp({ email: pendingEmail })).then((action) => {
+      if (resendOtp.fulfilled.match(action)) {
+        setResendCount((c) => c + 1);
+        startTimer();
+      }
+    });
+  };
 
   const handleChange = (i, val) => {
     if (!/^\d?$/.test(val)) return;
@@ -101,9 +133,29 @@ const VerifyEmailPage = () => {
           </form>
 
           <p className="text-center text-xs text-primary-400 mt-6">
-            Wrong email?{' '}
-            <Link to="/register" className="text-primary-600 hover:underline font-medium">Register again</Link>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-primary-600 hover:underline font-medium"
+            >Go back</button>
           </p>
+
+          <div className="text-center mt-4">
+            {resendCount < MAX_RESEND ? (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={timer > 0 || loading}
+                className="text-xs text-primary-500 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {timer > 0
+                  ? `Resend OTP in ${timer}s`
+                  : `Resend OTP${resendCount > 0 ? ` (${MAX_RESEND - resendCount} left)` : ''}`}
+              </button>
+            ) : (
+              <p className="text-xs text-primary-400">Maximum resend attempts reached.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

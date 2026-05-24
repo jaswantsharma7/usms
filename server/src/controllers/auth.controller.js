@@ -74,4 +74,10 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, { ...user.toJSON(), profileLinked }, 'User fetched'));
 });
 
-module.exports = { register, verifyEmail, login, logout, refreshToken, forgotPassword, resetPassword, getMe };
+const resendOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  await authService.resendOtp(email);
+  res.status(200).json(new ApiResponse(200, null, 'OTP resent successfully'));
+});
+
+module.exports = { register, verifyEmail, login, logout, refreshToken, forgotPassword, resetPassword, getMe, resendOtp };
