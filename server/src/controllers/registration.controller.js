@@ -23,7 +23,7 @@ const getPendingRegistrations = asyncHandler(async (req, res) => {
   const { status = 'pending', page = 1, limit = 20 } = req.query;
   const skip = (page - 1) * limit;
 
-  const query = {};
+  const query = { emailVerified: true };
   if (status !== 'all') query.status = status;
 
   const [registrations, total] = await Promise.all([
@@ -113,7 +113,7 @@ const rejectRegistration = asyncHandler(async (req, res) => {
 
 // GET /api/v1/registrations/count — badge count for admin
 const getPendingCount = asyncHandler(async (req, res) => {
-  const count = await PendingRegistration.countDocuments({ status: 'pending' });
+  const count = await PendingRegistration.countDocuments({ status: 'pending', emailVerified: true });
   res.status(200).json(new ApiResponse(200, { count }, 'Count fetched'));
 });
 

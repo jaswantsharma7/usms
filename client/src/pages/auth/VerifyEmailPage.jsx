@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { verifyEmail } from '../../features/auth/authSlice';
-import { resendOtp } from '../../features/auth/authSlice';
+import { verifyEmail, resendOtp, clearRegistrationPending } from '../../features/auth/authSlice';
 
 const MAX_RESEND = 3;
 const COOLDOWN_SEC = 60;
@@ -135,9 +134,12 @@ const VerifyEmailPage = () => {
           <p className="text-center text-xs text-primary-400 mt-6">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                dispatch(clearRegistrationPending());
+                navigate('/register');
+              }}
               className="text-primary-600 hover:underline font-medium"
-            >Go back</button>
+            >Wrong Email? Go back</button>
           </p>
 
           <div className="text-center mt-4">

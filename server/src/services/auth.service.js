@@ -25,13 +25,36 @@ const register = async ({ name, email, password, role, department, phone, dateOf
     existing.role = role || existing.role;
     const otp = existing.createEmailVerificationOtp();
     await existing.save();
+
+    // Update PendingRegistration with fresh data, reset emailVerified
+    if (['student', 'faculty'].includes(existing.role) && department) {
+      try {
+        await PendingRegistration.findOneAndUpdate(
+          { userId: existing._id },
+          {
+            role: existing.role, department, phone,
+            dateOfBirth: dateOfBirth || undefined,
+            gender: gender || undefined,
+            program, semester: semester ? Number(semester) : undefined,
+            batch, enrollmentYear: new Date().getFullYear(),
+            designation, qualification,
+            experience: experience ? Number(experience) : undefined,
+            emailVerified: false, status: 'pending',
+          },
+          { upsert: true }
+        );
+      } catch (err) {
+        logger.warn(`[register] PendingRegistration upsert failed: ${err.message}`);
+      }
+    }
+
     await sendEmail({ to: existing.email, ...verificationEmail(existing.name, otp) });
     return { user: existing };
   }
 
   const user = await User.create({ name, email, password, role: role || 'student' });
 
-  // Save registration details for admin approval (student/faculty only)
+  // Save registration details for admin approval (student/faculty only) — marked unverified until OTP confirmed
   if (['student', 'faculty'].includes(user.role) && department) {
     try {
       await PendingRegistration.create({
@@ -48,6 +71,7 @@ const register = async ({ name, email, password, role, department, phone, dateOf
         designation,
         qualification,
         experience: experience ? Number(experience) : undefined,
+        emailVerified: false,
       });
     } catch (err) {
       logger.warn(`[register] PendingRegistration create failed: ${err.message}`);
@@ -86,6 +110,9 @@ const verifyEmail = async ({ email, otp }) => {
   user.emailVerificationOtp = undefined;
   user.emailVerificationExpires = undefined;
   await user.save({ validateBeforeSave: false });
+
+  // Mark pending registration as email-verified so admin can see it
+  await PendingRegistration.findOneAndUpdate({ userId: user._id }, { emailVerified: true });
 
   const accessToken = generateAccessToken({ id: user._id, role: user.role });
   const refreshToken = generateRefreshToken({ id: user._id });
@@ -147,6 +174,7 @@ const logout = async (userId) => {
 const forgotPassword = async (email, resetUrlBase) => {
   const user = await User.findOne({ email });
   if (!user) throw new ApiError(404, 'No user with that email');
+  if (!user.isEmailVerified) throw new ApiError(403, 'Please verify your email before resetting your password');
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });

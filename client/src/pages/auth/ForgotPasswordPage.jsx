@@ -1,4 +1,3 @@
-BG_STYLE="style={{backgroundImage:\`radial-gradient(ellipse at 15% 10%, rgba(6,182,212,0.12) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(14,116,144,0.10) 0%, transparent 55%)\`}}"
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';

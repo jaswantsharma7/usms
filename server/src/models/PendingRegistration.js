@@ -29,6 +29,7 @@ const pendingRegistrationSchema = new mongoose.Schema(
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending',
     },
+    emailVerified: { type: Boolean, default: false },
     rejectionReason: { type: String },
   },
   { timestamps: true }

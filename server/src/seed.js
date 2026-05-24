@@ -12,6 +12,7 @@ const Grade       = require('./models/Grade');
 const Timetable   = require('./models/Timetable');
 const Attendance  = require('./models/Attendance');
 const Notification = require('./models/Notification');
+const PendingRegistration = require('./models/PendingRegistration');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/usms';
 const ACADEMIC_YEAR = '2024-2025';
@@ -124,7 +125,7 @@ async function seed(){
   await mongoose.connect(MONGO_URI);
   console.log('Connected');
 
-  await Promise.all([User,Student,Faculty,Course,Enrollment,Grade,Timetable,Attendance,Notification].map(M=>M.deleteMany({})));
+  await Promise.all([User,Student,Faculty,Course,Enrollment,Grade,Timetable,Attendance,Notification,PendingRegistration].map(M=>M.deleteMany({})));
   console.log('Cleared');
 
   // Admin
@@ -146,6 +147,7 @@ async function seed(){
         joinDate:new Date(2010+rand(0,12),rand(0,11),rand(1,28)),
         gender:pick(['male','female']),phone:`9${rand(100000000,999999999)}`,status:'active',
       });
+      await PendingRegistration.create({userId:uDoc._id,role:'faculty',department:dept,phone:fDoc.phone,gender:fDoc.gender,designation:fDoc.designation,qualification:fDoc.qualification,experience:fDoc.experience,emailVerified:true,status:'approved'});
       allFaculty.push({fDoc,uDoc,dept});fc++;
     }
   }
@@ -194,6 +196,7 @@ async function seed(){
         guardian:{name:nextName(),relation:pick(['Father','Mother','Guardian']),phone:`7${rand(100000000,999999999)}`},
         status:'active',cgpa:0,totalCredits:0,
       });
+      await PendingRegistration.create({userId:uDoc._id,role:'student',department:dept,phone:sDoc.phone,gender:sDoc.gender,dateOfBirth:sDoc.dateOfBirth,program:prog,semester:sem,batch,enrollmentYear:parseInt(batch.split('-')[0]),emailVerified:true,status:'approved'});
       allStudents.push({sDoc,uDoc,dept});sc++;
     }
   }

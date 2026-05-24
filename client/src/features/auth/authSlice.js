@@ -97,6 +97,8 @@ const authSlice = createSlice({
     },
     clearRegistrationPending(state) {
       state.registrationPending = false;
+      state.pendingEmail = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
