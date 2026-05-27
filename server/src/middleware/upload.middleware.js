@@ -5,7 +5,7 @@ const ApiError = require('../utils/ApiError');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, process.env.UPLOAD_PATH || 'uploads/');
+    cb(null, process.env.UPLOAD_PATH);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -28,7 +28,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB
+    fileSize: parseInt(process.env.MAX_FILE_SIZE),
   },
 });
 

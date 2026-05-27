@@ -5,8 +5,8 @@ const sendEmail = ({ to, subject, html }) => {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error('BREVO_API_KEY not set in environment');
 
-  const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'no-reply@usms.app';
-  const fromName  = process.env.EMAIL_FROM_NAME    || 'USMS';
+  const fromEmail = process.env.EMAIL_FROM_ADDRESS;
+  const fromName  = process.env.EMAIL_FROM_NAME;
 
   const payload = JSON.stringify({
     sender:      { name: fromName, email: fromEmail },

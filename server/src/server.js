@@ -5,14 +5,14 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const logger = require('./utils/logger');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 const server = http.createServer(app);
 
 // Socket.IO for real-time notifications
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL,
     credentials: true,
   },
 });

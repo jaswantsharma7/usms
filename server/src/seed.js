@@ -1,7 +1,10 @@
 /**
  * USMS Full Seed Script — node src/seed.js
  */
-require('dotenv').config();
+const path = require('path');
+// This forces dotenv to look exactly one folder above the 'src' directory because env file is located in the root (server), not in src. This is crucial for the seed script to work correctly.
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
 const mongoose = require('mongoose');
 const User        = require('./models/User');
 const Student     = require('./models/Student');
@@ -14,7 +17,7 @@ const Attendance  = require('./models/Attendance');
 const Notification = require('./models/Notification');
 const PendingRegistration = require('./models/PendingRegistration');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/usms';
+const MONGO_URI = process.env.MONGO_URI;
 const ACADEMIC_YEAR = '2024-2025';
 
 const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;

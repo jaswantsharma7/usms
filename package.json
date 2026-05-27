@@ -10,7 +10,8 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build:client": "cd client && npm run build",
     "start:server": "cd server && npm start",
-    "test:server": "cd server && npm test"
+    "test:server": "cd server && npm test",
+    "build": "npm run build:client && npm run start:server"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"
