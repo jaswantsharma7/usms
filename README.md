@@ -2,7 +2,7 @@
 
 A full-stack web application for managing the complete academic lifecycle of a university — students, faculty, courses, enrollments, attendance, grades, timetables, and notifications.
 
-**Stack:** React 18 · Redux Toolkit · Vite · Tailwind CSS · Node.js · Express · MongoDB · Socket.IO · Resend
+**Stack:** React 18 · Redux Toolkit · Vite · Tailwind CSS · Node.js · Express · MongoDB · Socket.IO
 
 ---
 
