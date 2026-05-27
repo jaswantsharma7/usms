@@ -155,7 +155,7 @@ const DashboardPage = () => {
             <span className="text-primary-300 text-xl font-light">—</span>
           </div>
           <p className="font-display text-lg text-primary-600">Dashboard unavailable</p>
-          <p className="text-sm mt-1.5 text-primary-400 font-light">Make sure the backend server is running on port 5000</p>
+          <p className="text-sm mt-1.5 text-primary-400 font-light">Try refreshing the page or contact support if the issue persists.</p>
         </div>
       )}
     </div>
