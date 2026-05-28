@@ -16,7 +16,7 @@ const navItems = {
     { to: '/registrations', icon: MdHowToReg, label: 'Registrations', badge: true },
     { to: '/courses', icon: MdBook, label: 'Courses' },
     { to: '/attendance', icon: MdCalendarToday, label: 'Attendance' },
-    { to: '/grades', icon: MdGrade, label: 'Grades' },
+    { to: '/grades', icon: MdGrade, label: 'Grades', end: true },
     { to: '/timetable', icon: MdAssignment, label: 'Timetable' },
     { to: '/notifications', icon: MdNotifications, label: 'Notifications' },
     { to: '/profile', icon: MdPerson, label: 'Profile' },
@@ -26,7 +26,7 @@ const navItems = {
     { to: '/students', icon: MdPeople, label: 'Students' },
     { to: '/courses', icon: MdBook, label: 'My Courses' },
     { to: '/attendance/mark', icon: MdCalendarToday, label: 'Attendance' },
-    { to: '/grades', icon: MdGrade, label: 'Grades' },
+    { to: '/grades', icon: MdGrade, label: 'Grades', end: true },
     { to: '/timetable', icon: MdAssignment, label: 'Timetable' },
     { to: '/notifications', icon: MdNotifications, label: 'Notifications' },
     { to: '/profile', icon: MdPerson, label: 'Profile' },
@@ -35,7 +35,7 @@ const navItems = {
     { to: '/dashboard', icon: MdDashboard, label: 'Dashboard' },
     { to: '/courses', icon: MdBook, label: 'Courses' },
     { to: '/attendance', icon: MdCalendarToday, label: 'Attendance' },
-    { to: '/grades', icon: MdGrade, label: 'Grades' },
+    { to: '/grades', icon: MdGrade, label: 'Grades', end: true },
     { to: '/grades/transcript', icon: MdAssignment, label: 'Transcript' },
     { to: '/timetable', icon: MdAssignment, label: 'Timetable' },
     { to: '/notifications', icon: MdNotifications, label: 'Notifications' },
@@ -109,10 +109,11 @@ const Sidebar = ({ open, onClose }) => {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {items.map(({ to, icon: Icon, label, badge }) => (
+          {items.map(({ to, icon: Icon, label, badge, end }) => (
             <NavLink
               key={to}
               to={to}
+              end={end}
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all duration-150
