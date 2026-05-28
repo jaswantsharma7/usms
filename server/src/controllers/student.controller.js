@@ -24,13 +24,12 @@ const createStudent = asyncHandler(async (req, res) => {
 });
 
 const updateStudent = asyncHandler(async (req, res) => {
-  const avatarPath = req.file ? req.file.filename : undefined;
+  const avatarBase64 = req.avatarBase64;
   const updates = { ...req.body };
-  if (avatarPath) {
-    // update user avatar
+  if (avatarBase64) {
     const student = await studentService.getStudentById(req.params.id);
     const User = require('../models/User');
-    await User.findByIdAndUpdate(student.userId._id, { avatar: avatarPath });
+    await User.findByIdAndUpdate(student.userId._id, { avatar: avatarBase64 });
   }
   const student = await studentService.updateStudent(req.params.id, updates);
   res.status(200).json(new ApiResponse(200, student, 'Student updated'));

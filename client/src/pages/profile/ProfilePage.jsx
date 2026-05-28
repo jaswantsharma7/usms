@@ -53,7 +53,7 @@ const ProfilePage = () => {
   const avatarPreview = avatarFile
     ? URL.createObjectURL(avatarFile)
     : user?.avatar
-    ? `/uploads/${user.avatar}`
+    ? user.avatar
     : null;
 
   return (

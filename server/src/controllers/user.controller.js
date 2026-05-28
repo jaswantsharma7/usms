@@ -28,7 +28,7 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
-  const avatarPath = req.file ? req.file.filename : undefined;
+  const avatarPath = req.avatarBase64 || undefined;
   const user = await userService.updateProfile(req.user._id, req.body, avatarPath);
   res.status(200).json(new ApiResponse(200, user, 'Profile updated'));
 });

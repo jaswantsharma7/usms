@@ -68,8 +68,8 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 }
 
-// Static files (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+
 
 // Base route
 app.get('/', (req, res) => {

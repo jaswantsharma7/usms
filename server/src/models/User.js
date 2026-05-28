@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
       default: 'student',
     },
     avatar: {
-      type: String,
+      type: String, // base64 data URI, e.g. "data:image/jpeg;base64,..."
       default: null,
     },
     isActive: {

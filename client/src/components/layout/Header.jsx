@@ -6,7 +6,7 @@ import { logoutUser } from '../../features/auth/authSlice';
 const Avatar = ({ user }) => (
   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-semibold shadow-soft overflow-hidden">
     {user?.avatar
-      ? <img src={`/uploads/${user.avatar}`} alt={user?.name} className="w-full h-full object-cover" />
+      ? <img src={user.avatar} alt={user?.name} className="w-full h-full object-cover" />
       : user?.name?.charAt(0).toUpperCase()
     }
   </div>

@@ -48,7 +48,7 @@ const Avatar = ({ user, size = 'md' }) => {
   return (
     <div className={`${dim} rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shrink-0 shadow-soft overflow-hidden`}>
       {user?.avatar
-        ? <img src={`/uploads/${user.avatar}`} alt={user?.name} className="w-full h-full object-cover" />
+        ? <img src={user.avatar} alt={user?.name} className="w-full h-full object-cover" />
         : user?.name?.charAt(0).toUpperCase()
       }
     </div>
