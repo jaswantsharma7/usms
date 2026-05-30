@@ -31,7 +31,7 @@ Live Link: https://usms-ten.vercel.app/
 
 ### Authentication & Security
 - JWT authentication with short-lived **access tokens** + long-lived **refresh tokens** (stored in httpOnly cookies)
-- Email verification via 6-digit OTP (powered by [Resend](https://resend.com))
+- Email verification via 6-digit OTP (powered by [Brevo](https://brevo.com))
 - Forgot/reset password flow with secure token
 - Rate limiting — 1000 req/15min general, 50 req/15min on auth endpoints
 - Helmet, CORS, mongo-sanitize, and XSS-clean middleware
@@ -81,7 +81,7 @@ Browser (React SPA)
        ▼
 Express API  ──►  MongoDB
        │
-       └──►  Resend (transactional email)
+       └──►  Brevo (transactional email)
 ```
 
 - **Frontend** — single-page app served by Vite in dev, Nginx in Docker
@@ -135,7 +135,7 @@ usms/
 │   │   │   ├── ApiError.js
 │   │   │   ├── ApiResponse.js
 │   │   │   ├── asyncHandler.js
-│   │   │   ├── email.js              # Resend integration
+│   │   │   ├── email.js              # Brevo integration
 │   │   │   ├── gpaCalculator.js
 │   │   │   └── logger.js             # Winston
 │   │   ├── validators/       # express-validator schemas
@@ -207,7 +207,7 @@ usms/
 | `Course` | title, code, department, credits, semester, maxStudents, faculty, status |
 | `Enrollment` | student, course, enrollmentDate, status, grade |
 | `Attendance` | student, course, date, status (present/absent/late), markedBy |
-| `Grade` | student, course, internal, midterm, final, total, grade (A+…F), gradePoints, published |
+| `Grade` | student, course, midterm (30%), finalExam (40%), assignments (20%), quizzes (10%), totalMarks, grade (A+…F), gradePoints, isPublished |
 | `Timetable` | course, faculty, day, startTime, endTime, room, semester |
 | `Notification` | recipient, title, message, type, read, link |
 | `PendingRegistration` | userId, role, department, phone, dateOfBirth, gender, program, semester, batch, designation, qualification, experience, status, rejectionReason |
@@ -220,7 +220,7 @@ usms/
 
 - Node.js 20+
 - MongoDB 7+ (local or Atlas)
-- [Resend](https://resend.com) account for transactional email
+- [Brevo](https://brevo.com) account for transactional email
 
 ### 1. Clone
 
@@ -281,8 +281,9 @@ Default credentials after seeding:
 | `PORT` | | Default `5000` |
 | `NODE_ENV` | | `development` or `production` |
 | `CLIENT_URL` | ✅ | Frontend origin e.g. `http://localhost:5173` |
-| `RESEND_API_KEY` | ✅ | From [resend.com/api-keys](https://resend.com/api-keys) |
-| `EMAIL_FROM` | ✅ | Verified sender e.g. `noreply@yourdomain.com` |
+| `BREVO_API_KEY` | ✅ | From [app.brevo.com/settings/keys/api](https://app.brevo.com/settings/keys/api) |
+| `EMAIL_FROM_ADDRESS` | ✅ | Verified sender address e.g. `noreply@yourdomain.com` |
+| `EMAIL_FROM_NAME` | ✅ | Sender display name e.g. `USMS` |
 
 Generate secrets:
 ```bash
@@ -519,7 +520,7 @@ Until approved, students see a **"Courses Unavailable"** / **"Pending Approval"*
 | `mongoose` | MongoDB ODM |
 | `jsonwebtoken` | JWT sign/verify |
 | `bcryptjs` | Password hashing |
-| `resend` | Transactional email (OTP, password reset) |
+| `brevo` (via native HTTPS) | Transactional email (OTP, password reset) |
 | `socket.io` | Real-time notifications |
 | `express-rate-limit` | Rate limiting |
 | `helmet` | HTTP security headers |
@@ -550,3 +551,19 @@ Until approved, students see a **"Courses Unavailable"** / **"Pending Approval"*
 ## License
 
 MIT
+
+---
+
+## Bugs Fixed & Code Notes
+
+The following issues were identified and corrected during the commenting pass:
+
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| 1 | `server/src/utils/email.js` | Used `resend` SDK but package was not in `package.json`; implementation used raw HTTPS anyway | Rewrote to use native `https` module calling the **Brevo** v3 SMTP API, removing the missing SDK dependency entirely |
+| 2 | `server/src/services/grade.service.js` | Grade component weights summed to **1.05** (midterm 0.30 + final 0.40 + assignments 0.20 + quizzes **0.15**), causing `totalMarks` to exceed 100 for top-scoring students | Changed quizzes weight to **0.10** so weights sum to exactly 1.00 |
+| 3 | `server/src/models/Attendance.js` | No unique compound index on `(student, course, date)` — allowed duplicate attendance entries for the same student on the same day | Added `{ student, course, date }` unique index |
+| 4 | `server/src/utils/email.js` | Env variable was documented as `EMAIL_FROM` but code read `EMAIL_FROM_ADDRESS` / `EMAIL_FROM_NAME` | Updated `.env` documentation (this README) to match the code |
+| 5 | `server/src/utils/gpaCalculator.js` | `getLetterGrade` thresholds differed from the seed script (e.g. A+ at 95 vs 97), causing inconsistent letter grades depending on which path calculated the grade | Added a comment marking `getLetterGrade` as the single canonical source; seed script should import it instead of re-defining thresholds |
+| 6 | `server/src/services/auth.service.js` | `forgotPassword` did not roll back the reset token when the email send failed, leaving a stale (un-usable) token in the DB | Added rollback (`passwordResetToken = undefined`) inside the catch block before rethrowing |
+| 7 | `server/src/services/course.service.js` | `updateCourse` allowed the `code` field to be changed, which would break historical enrollment/grade references | Added `delete updateData.code` guard |
