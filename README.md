@@ -4,6 +4,8 @@ A full-stack web application for managing the complete academic lifecycle of a u
 
 **Stack:** React 18 · Redux Toolkit · Vite · Tailwind CSS · Node.js · Express · MongoDB · Socket.IO
 
+Live Link: https://usms-ten.vercel.app/
+
 ---
 
 ## Table of Contents
@@ -59,6 +61,15 @@ A full-stack web application for managing the complete academic lifecycle of a u
 - View personal attendance summary per course
 - View personal timetable
 - Receive real-time notifications via Socket.IO
+
+---
+
+## Screenshots
+<img width="1675" height="887" alt="image" src="https://github.com/user-attachments/assets/8ad85f96-aa08-4da9-8ab7-8321d3e0f326" />
+<img width="1669" height="880" alt="image" src="https://github.com/user-attachments/assets/e0ba0125-fe41-4b7b-bf4b-59a7a6e51660" />
+<img width="1670" height="880" alt="image" src="https://github.com/user-attachments/assets/7168d2a8-d9a3-4569-b932-19f15ff82d8e" />
+<img width="1667" height="879" alt="image" src="https://github.com/user-attachments/assets/7777f336-8d06-439e-b4fe-e04381f3762e" />
+<img width="1669" height="879" alt="image" src="https://github.com/user-attachments/assets/6512e1fc-1a65-4180-9a4f-dfc6a697ae8a" />
 
 ---
 
